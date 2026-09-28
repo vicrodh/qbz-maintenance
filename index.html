@@ -215,6 +215,26 @@
       background: #16191e;
     }
 
+    .counter {
+      position: relative;
+      z-index: 1;
+      padding: .5rem 1rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .03);
+      text-align: center;
+      color: var(--muted);
+      font: 500 .72rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .counter strong {
+      margin-left: .35em;
+      color: var(--fg);
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      font-variant-numeric: tabular-nums;
+    }
     @media (max-width: 640px) {
       .page { width: 100%; padding-left: 1rem; padding-right: 1rem; }
       article {
@@ -235,6 +255,9 @@
   </style>
 </head>
 <body>
+  <aside class="counter" data-start="2026-09-18" data-end="">
+    Days without Qobuz Official Client for Linux since QBZ shutdown:<strong id="days-without">10</strong>
+  </aside>
   <div class="page">
     <header class="masthead">
       <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" aria-hidden="true" focusable="false">
@@ -356,6 +379,30 @@
 
     <footer>Native hi-fi · Bit-perfect audio</footer>
   </div>
+
+  <script>
+    (() => {
+      // Days since the shutdown, counted in the viewer's calendar days.
+      // Set data-end (YYYY-MM-DD) on .counter to freeze the count on that day.
+      const bar = document.querySelector('.counter');
+      const out = document.getElementById('days-without');
+      const day = 864e5;
+      const toUtc = (iso) => {
+        const [y, m, d] = iso.split('-').map(Number);
+        return Date.UTC(y, m - 1, d);
+      };
+      const render = () => {
+        const now = new Date();
+        const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+        const end = bar.dataset.end ? toUtc(bar.dataset.end) : today;
+        out.textContent = Math.max(0, Math.round((end - toUtc(bar.dataset.start)) / day));
+        if (bar.dataset.end) return;
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        setTimeout(render, midnight - now + 1000);
+      };
+      render();
+    })();
+  </script>
 
   <script>
     (() => {
